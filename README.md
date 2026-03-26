@@ -10,6 +10,10 @@ Phase 3
 7. We added the sort to the faculty tab by name and rank with its own method and display the sorted output. This is the point where we tried to test and realized we could not move the html file to the webvm/apache because the vm was broken.  Without being able to put our html on that vm, we could not test our code.  Comparing our html and python code in AI, we attempted to confirm that logically it works together. That's where we stopped.
 8. Oscar added all the tabs in the screen from our phase 3 assignment even though only the faculty and courses tab for this assignment.
 9. Lori created the phase 3 branch in GitHub and started updating the readme file.
-10. Completed clean up/turn in tasks 10, 11, 12, and the tar file.  Provided a link via email to GitHub repository.
-11. Hopefully we can get our WEBVM fixed so that we can test and view our webpage.
+10. We worked together to complete the dumpall for the project.
+11. Completed copying all the web development files to main project in webpages folder.
+12. Provided a link via email to GitHub repository.
+    Created the tar file.
+
+    Hopefully we can get our WEBVM fixed so that we can test and view our webpage.
 
