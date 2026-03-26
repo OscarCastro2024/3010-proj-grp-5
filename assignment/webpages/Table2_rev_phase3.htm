@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>ECU CS Dashboard</title>
+	</head>
+	<body>
+		<header>
+			<h1>ECU CS Dashboard</h1>
+			<a href="">Faculty</a>
+		    <a href="">Courses</a>
+		    <a href="">SCH Drilldown</a>
+		    <a href="">FTE</a>
+		    <a href="">Faculty Committees</a>
+		    <a href="">Resources</a>
+		    <hr>
+	    </header>
+	    <main>
+			<h3>
+				Faculty
+			</h3> 
+			<form action="/cgi-bin/faculty.py" method="get">
+	                   <label for="lname"<Enter Last Name:</label>
+	                   <input type="text" id="lname" name="lname">
+	                   <input type="submit" value="Search">
+	                </form>
+	                <form action="/cgi-bin/faculty.py" method="get">
+	                   <label for="sort">Sort By:</label>
+	                   <select name="sort" id="sort">
+	                     <option value="">Select</option>
+	                     <option value="name">Name</option>
+	                     <option value="rank">Rank</option>
+	                   </select>
+	                   
+	                   <input type="hidden" name="search" value="">
+	                   <input type="submit" name="Sort">
+	                   </form>
+			<table border="1">
+			    <tr>
+			       <th>Name</th>
+			       <th>Rank</th>
+			       <th>Email</th>
+			       <th>Phone</th>
+			       <th>Office</th>
+			       <th>Research Interests</th>
+			       <th>Remarks</th>
+			     </tr> 
+			</table>
+		
+	   </main>
+   </body>
+</html>
+	
+		   
