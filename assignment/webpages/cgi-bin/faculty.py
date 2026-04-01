@@ -8,21 +8,14 @@ import html
 #enables debugging in the html
 cgitb.enable()
 
-print('Content-Type: text/html<br>\n\n')
-
-#Read form data-this is what comes back in the URL when the person enters a name and hits submit
-form = cgi.FieldStorage()
-lname = form.getvalue('lname') 
-
-#connect to database
-
-conn = psycopg2.connect(
-  "dbname=seng3010, user=webuser1,password=student,host=192.168.56.10")
-cursor = conn.cursor()
-
+print('Content-Type: text/html\n')
+# -----------------------------
+# Faculty Class
+# -----------------------------
 #Class(object)
 class Faculty:
-    def __init__(self,name,rank,email,phone,office,research_interest,remarks):
+    def __init__(self,id,name,rank,email,phone,office,research_interest,remarks,lname,fname,mi):
+        self.id = id
         self.name = name
         self.rank = rank
         self.email = email
@@ -30,42 +23,128 @@ class Faculty:
         self.office = office
         self.research_interest = research_interest
         self.remarks = remarks
+        self.lname = lname
+        self.fname = fname
+        self.mi = mi
+    def to_html_row(self):
+        return f"""
+        <tr>
+            <td>{html.escape(self.fname)} {html.escape(self.mi or "")} {html.escape(self.lname)}</td>
+            <td>{html.escape(self.rank)}</td>
+            <td>{html.escape(self.email)}</td>
+            <td>{html.escape(self.phone)}</td>
+            <td>{html.escape(self.office)}</td>
+            <td>{html.escape(self.research_interest)}</td>
+            <td>{html.escape(self.remarks)}</td>
+        </tr>
+        """
+# -----------------------------
+# Faculty Directory Class
+# -----------------------------
 class FacultyDirectory:
-   def to_html_table(self,faculty_list):
-       html = "<table> ... </table>"
-       return html  
-#Method
-    def faculty_list(self):
-        return {key: value for key, value in self.__dict__.items()}
-    def faculty_sort(self,sort=""):
-        cur = self.conn.cursor()
-    def list_to_html(faculty_members):
-        return "".join(f.to_html_row() for f in faculty_members)
-
     allowed_sorts = {
-       "name": "lname",
-       "rank": "rank"}
+        "name": "lname",
+        "rank": "rank"
+    }
+    def __init__(self, conn):
+        self.conn = conn
+    
+    def get_faculty(self,search=None,sort=None):
+        cursor= self.conn.cursor()
 
+        query = """
+        SELECT id, name, rank, email, phone, office,research_interest, remarks,lname,fname,mi
+        FROM   faculty
+        """
+        params = []
+
+        faculty_list = []
+
+        cursor.execute(query, params)
+
+        faculty_list = []
+        row = cursor.fetchone()
+
+        while row:
+            faculty_list.append(Faculty(*row))
+            row = cursor.fetchone()
+
+        if search:
+            query +=" WHERE lname ILIKE %s"
+            params.append("%" + search + "%")
+
+        if sort in self.allowed_sorts:
+            query +=f" ORDER BY {self.allowed_sorts[sort]}"
+
+        cursor.execute(query, params)
+
+            row = cursor.fetchone()
+
+        return faculty_list
+
+
+    @staticmethod 
+    def list_to_html(faculty_list):
+       rows = "".join(f.to_html_row() for f in faculty_list)
+       return f"""
+       <table border="1" cellpadding="5">
+       <tr>
+       <th>Name</th>
+       <th>Rank</th>
+       <th>Email</th>
+       <th>Phone</th>
+       <th>Office</th>
+       <th>Research Interests</th>
+       <th>Remarks</th>
+       </tr>
+       {rows}
+       </table>
+       """
+#--------------------------
 #cgi input
+#--------------------------
+#Read form data-this is what comes back in the URL when the person enters a name and hits submit
 form = cgi.FieldStorage()
+lname = form.getvalue("lname")
+sort = form.getvalue("sort")
+ 
 
-#fname = form.getvalue('fname')
-lname = form.getvalue('lname')
+#--------------------------
+#connect to database
+#--------------------------
+conn = psycopg2.connect(
+  "dbname=seng3010, user=webuser1,password=student,host=192.168.56.30, port=5432")
 
-#Create object
-faculty = Faculty(name, rank, email, phone, office, research_interest, remarks)
+directory = FacultyDirectory(conn)
+faculty_members = directory.get_faculty(search=lname, sort=sort)
 
-#Output
+# -----------------------------
+# HTML Output
+# -----------------------------
 print("<html><body>")
-cursor.execute("select * from faculty where lname = %s", (lname,))
-for key, value in self.faculty_list().items():
-    print(f"{key}: {value}")
-if sort in allowed_sorts:
-query += f" ORDER BY {allowed_sorts[sort]}"
-print(Faculty.list_to_html(faculty_members))
-#print( fname + " " + mi "." + lname + "," + rank + " " + email + " " + phone + " " + office + " " + research_interest + " " + remarks)
+print("<h2>Faculty Directory</h2>")
+
+print("""
+<form method="get">
+    Search by last name:
+    <input type="text" name="lname">
+    <br><br>
+    Sort by:
+    <select name="sort">
+        <option value="">None</option>
+        <option value="name">Name</option>
+        <option value="rank">Rank</option>
+    </select>
+    <br><br>
+<input type="submit" value="Search">
+</form>
+<hr>
+""")
+
+print(FacultyDirectory.list_to_html(faculty_members))
+
 print("</body></html>")
-cursor.close()
-conn.close
+
+conn.close()
 
 
