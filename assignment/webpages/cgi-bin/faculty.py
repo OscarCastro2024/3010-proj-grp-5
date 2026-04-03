@@ -14,8 +14,8 @@ print('Content-Type: text/html\n')
 # -----------------------------
 #Class(object)
 class Faculty:
-    def __init__(self,id,name,rank,email,phone,office,research_interest,remarks,lname,fname,mi):
-        self.id = id
+    def __init__(self,faculty_id,name,rank,email,phone,office,research_interest,remarks,lname,fname,mi):
+        self.id = faculty_id
         self.name = name
         self.rank = rank
         self.email = email
@@ -29,13 +29,13 @@ class Faculty:
     def to_html_row(self):
         return f"""
         <tr>
-            <td>{html.escape(self.fname)} {html.escape(self.mi or "")} {html.escape(self.lname)}</td>
-            <td>{html.escape(self.rank)}</td>
-            <td>{html.escape(self.email)}</td>
-            <td>{html.escape(self.phone)}</td>
-            <td>{html.escape(self.office)}</td>
-            <td>{html.escape(self.research_interest)}</td>
-            <td>{html.escape(self.remarks)}</td>
+            <td>{html.escape(self.name or "")}</td>
+            <td>{html.escape(self.rank or "")}</td>
+            <td>{html.escape(self.email or "" )}</td>
+            <td>{html.escape(self.phone or "")}</td>
+            <td>{html.escape(self.office or "")}</td>
+            <td>{html.escape(self.research_interest or "")}</td>
+            <td>{html.escape(self.remarks or "")}</td>
         </tr>
         """
 # -----------------------------
@@ -49,16 +49,21 @@ class FacultyDirectory:
     def __init__(self, conn):
         self.conn = conn
     
-    def get_faculty(self,search=None,sort=None):
+    def get_faculty(self, search=None, sort=None):
         cursor= self.conn.cursor()
 
         query = """
-        SELECT id, name, rank, email, phone, office,research_interest, remarks,lname,fname,mi
-        FROM   faculty
+            SELECT faculty_id, name, rank, email, phone, office,research_interest, remarks,lname,fname,mi
+            FROM   faculty
         """
         params = []
-
-        faculty_list = []
+#add search filter BEFORE executing
+        if search:
+                   query += " WHERE lname ILIKE %s"
+                   params.append("%" + search + "%")
+#add sorting BEFORE executing
+        if sort in self.allowed_sorts:
+            query  += f" ORDER BY {self.allowed_sorts[sort]}"
 
         cursor.execute(query, params)
 
@@ -67,17 +72,6 @@ class FacultyDirectory:
 
         while row:
             faculty_list.append(Faculty(*row))
-            row = cursor.fetchone()
-
-        if search:
-            query +=" WHERE lname ILIKE %s"
-            params.append("%" + search + "%")
-
-        if sort in self.allowed_sorts:
-            query +=f" ORDER BY {self.allowed_sorts[sort]}"
-
-        cursor.execute(query, params)
-
             row = cursor.fetchone()
 
         return faculty_list
@@ -113,7 +107,9 @@ sort = form.getvalue("sort")
 #connect to database
 #--------------------------
 conn = psycopg2.connect(
-  "dbname=seng3010, user=webuser1,password=student,host=192.168.56.30, port=5432")
+  dbname="seng3010", user="webuser1",
+password="student", host="192.168.56.30",
+port=5432)
 
 directory = FacultyDirectory(conn)
 faculty_members = directory.get_faculty(search=lname, sort=sort)
@@ -146,5 +142,3 @@ print(FacultyDirectory.list_to_html(faculty_members))
 print("</body></html>")
 
 conn.close()
-
-
