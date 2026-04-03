@@ -17,3 +17,20 @@ Phase 3
 
     Hopefully we can get our WEBVM fixed so that we can test and view our webpage.
 
+POST CRASH AND RESTORE:
+-----------------------
+6, 7, and 8 revisited:
+Monday 3/30- We all worked together to make sure all of our files had been restored and Oscar cloned the Git Hub repository to copy our new py and html file that we had been working on revising/troubleshooting while our vm was down. We executed the htm file using URL http://192.168.56.10/Table2_rev_phase3.htm in firefox.  Still experiencing issues, we spent the rest of our meeting troubleshooting and tweaking to get it to execute the methods but we kept getting internal server errors of different codes.  We felt like we were making progress but not enough forward progress to at least see our data returned.  Called it a night to review code and regroup on Tuesday.
+Tuesday 3/31 - Same story.  Lori had revised the py earlier with help from AI agent (copilot) and pushed it to our GitHub repository. When we met, Oscar restored the new version to our webvm from our repository. We still could not execute correctly. Justin and Lori worked through the issues one by one using another AI agent (Claude), compared notes, and collectively made a few corrections to get it to finally execute our methods! We got in touch with Oscar to tell him the good news, did more testing, and we were all satisfied with the results.
+These are the issues we discovered:
+We needed to install psycopg2.
+We corrected parameter orders in py.  The order was tripping us up for our displays.
+We got tripped up on a column name reference and ended up changing another column name reference in the end for display purposes only - was not causing error, just not what we wanted visually.
+Justin and I showed Oscar how to test the py script right from the terminal.  It made it easier for Justin and I to isolate just the py object for finding errors.  If that was mentioned somewhere we totally missed that and it was very helpful. This is also how we found out we were missing the psycopg2 install. We installed that, twice. We had a broken dependency, something had been interrupted in a previous install that we had to fix first (dpkg), pip3 install was installed in a user directory that Apache couldn't access.  
+We actually did need the port=5432.  We originally added it as '80' when we were troubleshooting (grasping at straws) on Monday. Without it, it was trying to connect to a local socket instead of the network.
+We ran psql -h 192.168.56.30 -U webuser1 -d seng3010 -p 5432 to test connectivity and communication to the SQLVM.
+We also corrected missing double quotes in the connection parameters. Connection credentials now solid.
+We found we had a column name wrong in one of the select queries (mentioned earlier) and in turn, everywhere we referenced all the table columns in queries and class defs.
+We made one more change to handle columns selected with no data.  We added 'or ""' to all the html.escapes so that when there was no data for the row in that column it would replace it with a blank.
+Thank you for reviewing!
+
