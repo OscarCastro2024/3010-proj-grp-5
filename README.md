@@ -32,5 +32,8 @@ We ran psql -h 192.168.56.30 -U webuser1 -d seng3010 -p 5432 to test connectivit
 We also corrected missing double quotes in the connection parameters. Connection credentials now solid.
 We found we had a column name wrong in one of the select queries (mentioned earlier) and in turn, everywhere we referenced all the table columns in queries and class defs.
 We made one more change to handle columns selected with no data.  We added 'or ""' to all the html.escapes so that when there was no data for the row in that column it would replace it with a blank.
+
+URL: http://192.168.56.10/Table2_rev_phase3.htm
+please click submit query to see the list.  Then do search and sort.
 Thank you for reviewing!
 
