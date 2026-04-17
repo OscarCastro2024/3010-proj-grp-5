@@ -9,6 +9,7 @@ Oscar checked to make sure our webpage still worked, and we were able to display
 Lori updated readme while Oscar copied Dockerfile in the webpages folder and loaded the pgdump file to folder Phase4_dumpalls.
 Tarfile-webvm under home/student/3010-proj-grp-5/assignment zip folder.
 Dockerfile-webvm under home/student/3010-proj-grp-5/assignment/webpages.
+4/17/26-Lori updated the sqlvm IP address to postgres to use with container in github only.
 dumpall - sqlvm under home/student/3010-proj-grp-5/assignment/phase4_dumpalls.
 NOTE: Since we weren't sure about what should be in the tar file for this part of the assignment.  We didn't do much on the webvm except create the Dockerfile, so when we did the tar file we moved the Dockerfile to our SQLVM and then tarred that.  When we do the final tar, to be sure, should we be including the webvm or the sqlvm again?
 Thank you!
