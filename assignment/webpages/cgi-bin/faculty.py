@@ -113,7 +113,8 @@ sort = form.getvalue("sort")
 #connect to database
 #--------------------------
 conn = psycopg2.connect(
-  "dbname=seng3010, user=webuser1,password=student,host=192.168.56.30, port=5432")
+  "dbname=seng3010, user=webuser1,password=student,host=postgres, port=5432")
+ # "dbname=seng3010, user=webuser1,password=student,host=192.168.56.30, port=5432")
 
 directory = FacultyDirectory(conn)
 faculty_members = directory.get_faculty(search=lname, sort=sort)
