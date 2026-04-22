@@ -100,16 +100,16 @@ def get_fte(conn, prefix, gu, divisor):
             year,
             semester,
             SUM((enrollment * ch) / %s) AS fte
-        FROM fontanasouthl19.lfs_temp_sched_hist h
-        JOIN fontanasouthl19.lfs_temp_courses c
+        FROM dept_courses_sched_hist_import h
+        JOIN dept_courses_import c
             ON h.prefix = c.prefix
-           AND h.course_num = c.course_num
-        JOIN fontanasouthl19.lfs_temp_faculty f
+           AND h.number = c.number
+        JOIN faculty_import2 f
             ON h.instructor = f.id
         WHERE 
             c.ch > 0
             AND h.prefix = %s
-            AND f.currentlyemployed = 'Yes'
+            AND f.currently_employed = 'Yes'
     """
     params = [divisor, prefix]
 
@@ -133,16 +133,16 @@ def get_dasc_fte(conn):
             year,
             semester,
             SUM((enrollment * ch) / 186.23) AS fte
-        FROM fontanasouthl19.lfs_temp_sched_hist h
-        JOIN fontanasouthl19.lfs_temp_courses c
+        FROM dept_courses_sched_hist_import h
+        JOIN dept_courses_import c
             ON h.prefix = c.prefix
-           AND h.course_num = c.course_num
-        JOIN fontanasouthl19.lfs_temp_faculty f
+           AND h.number = c.number
+        JOIN faculty_import2 f
             ON h.instructor = f.id
         WHERE 
             c.ch > 0
             AND h.prefix = 'DASC'
-            AND f.currentlyemployed = 'Yes'
+            AND f.currently_employed = 'Yes'
         GROUP BY 
             honorific, first, mi, last, year, semester
         ORDER BY 
@@ -170,7 +170,7 @@ sort = form.getvalue("sort")
 #--------------------------
 conn = psycopg2.connect(
   dbname="seng3010", user="webuser1",
-password="student", host="192.168.56.30",
+password="student", host="172.17.0.3",
 port=5432)
 
 CSCI_G = get_fte(conn, "CSCI", "G", 186.23)
