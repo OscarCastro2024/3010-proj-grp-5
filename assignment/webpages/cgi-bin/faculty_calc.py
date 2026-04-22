@@ -177,6 +177,7 @@ CSCI_G = get_fte(conn, "CSCI", "G", 186.23)
 CSCI_U = get_fte(conn, "CSCI", "U", 406.24)
 SENG_G = get_fte(conn, "SENG", "G", 90.17)
 SENG_U = get_fte(conn, "SENG", "U", 232.25)
+DASC = get_dasc_fte(conn)
 
 directory = FacultyDirectory(conn)
 faculty_members = directory.get_faculty(search=lname, sort=sort)
