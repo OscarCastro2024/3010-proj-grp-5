@@ -163,7 +163,7 @@ def get_dasc_fte(conn):
 form = cgi.FieldStorage()
 lname = form.getvalue("lname")
 sort = form.getvalue("sort")
- 
+tab = form.getvalue("tab") or "directory"
 
 #--------------------------
 #connect to database
@@ -187,6 +187,7 @@ faculty_members = directory.get_faculty(search=lname, sort=sort)
 # -----------------------------
 print("<html><body>")
 print("<h2>Faculty Directory</h2>")
+#print("<h2>Faculty Directory</h2>")
 
 print("""
 <form method="get">
@@ -222,6 +223,6 @@ for title, data in datasets:
     for row in data:
         print(f"<p>{row}</p>")
 
-print("</body></html>")
-
+#print("</body></html>")
+print("</main></body></html>")
 conn.close()
