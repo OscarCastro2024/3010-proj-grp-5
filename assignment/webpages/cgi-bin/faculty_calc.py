@@ -5,15 +5,14 @@ import cgitb
 import psycopg2
 import html
 
-#enables debugging in the html
 cgitb.enable()
-
 print('Content-Type: text/html\n')
+
 # -----------------------------
 # Faculty Class
 # -----------------------------
 class Faculty:
-    def __init__(self,faculty_id,name,rank,email,phone,office,research_interest,remarks,lname,fname,mi):
+    def __init__(self, faculty_id, name, rank, email, phone, office, research_interest, remarks, lname, fname, mi):
         self.id = faculty_id
         self.name = name
         self.rank = rank
@@ -25,34 +24,35 @@ class Faculty:
         self.lname = lname
         self.fname = fname
         self.mi = mi
+
     def to_html_row(self):
         return f"""
         <tr>
             <td>{html.escape(self.name or "")}</td>
             <td>{html.escape(self.rank or "")}</td>
-            <td>{html.escape(self.email or "" )}</td>
+            <td>{html.escape(self.email or "")}</td>
             <td>{html.escape(self.phone or "")}</td>
             <td>{html.escape(self.office or "")}</td>
             <td>{html.escape(self.research_interest or "")}</td>
             <td>{html.escape(self.remarks or "")}</td>
         </tr>
         """
+
 # -----------------------------
 # Faculty Directory Class
 # -----------------------------
 class FacultyDirectory:
-    allowed_sorts = {
-        "name": "lname",
-        "rank": "rank"
-    }
+    allowed_sorts = {"name": "lname", "rank": "rank"}
+
     def __init__(self, conn):
         self.conn = conn
-    
+
     def get_faculty(self, search=None, sort=None):
         cursor = self.conn.cursor()
         query = """
-            SELECT faculty_id, name, rank, email, phone, office, research_interest, remarks, lname, fname, mi
-            FROM   faculty
+            SELECT faculty_id, name, rank, email, phone, office,
+                   research_interest, remarks, lname, fname, mi
+            FROM faculty
         """
         params = []
         if search:
@@ -69,7 +69,7 @@ class FacultyDirectory:
             row = cursor.fetchone()
         return faculty_list
 
-    @staticmethod 
+    @staticmethod
     def list_to_html(faculty_list):
         rows = "".join(f.to_html_row() for f in faculty_list)
         return f"""
@@ -82,15 +82,19 @@ class FacultyDirectory:
         </table>
         """
 
+# -----------------------------
+# FTE functions
+# -----------------------------
 def get_fte(conn, prefix, gu, divisor):
     query = """
-        SELECT 
+        SELECT
             honorific || ' ' || first || ' ' || mi || ' ' || last AS instructor,
             year, semester,
             SUM((enrollment * ch) / %s) AS fte
-        FROM dept_courses_sched_hist_import h
+        FROM dept_course_sched_hist_import h
         JOIN dept_courses_import c
-            ON h.prefix = c.prefix AND h.number = c.number
+            ON h.prefix = c.prefix
+           AND h.number::text = c.number::text
         JOIN faculty_import2 f
             ON h.instructor = f.id
         WHERE c.ch > 0
@@ -101,21 +105,24 @@ def get_fte(conn, prefix, gu, divisor):
     if gu is not None:
         query += " AND c.gu = %s"
         params.append(gu)
-    query += " GROUP BY honorific, first, mi, last, year, semester ORDER BY instructor, year, semester;"
-
+    query += """
+        GROUP BY honorific, first, mi, last, year, semester
+        ORDER BY instructor, year, semester;
+    """
     with conn.cursor() as cur:
         cur.execute(query, params)
         return cur.fetchall()
 
 def get_dasc_fte(conn):
     query = """
-        SELECT 
+        SELECT
             honorific || ' ' || first || ' ' || mi || ' ' || last AS instructor,
             year, semester,
             SUM((enrollment * ch) / 186.23) AS fte
-        FROM dept_courses_sched_hist_import h
+        FROM dept_course_sched_hist_import h
         JOIN dept_courses_import c
-            ON h.prefix = c.prefix AND h.number = c.number
+            ON h.prefix = c.prefix
+           AND h.number::text = c.number::text
         JOIN faculty_import2 f
             ON h.instructor = f.id
         WHERE c.ch > 0
@@ -128,17 +135,17 @@ def get_dasc_fte(conn):
         cur.execute(query)
         return cur.fetchall()
 
-#--------------------------
+# --------------------------
 # CGI input
-#--------------------------
+# --------------------------
 form = cgi.FieldStorage()
 lname = form.getvalue("lname")
 sort = form.getvalue("sort")
 tab = form.getvalue("tab") or "directory"
 
-#--------------------------
+# --------------------------
 # Connect to database
-#--------------------------
+# --------------------------
 conn = psycopg2.connect(
     dbname="seng3010", user="webuser1",
     password="student", host="172.17.0.3",
@@ -206,8 +213,7 @@ if tab == "fte":
         inits = "\n".join(f"$('#{tid}').DataTable({{pageLength:5, lengthMenu:[5,10,25,50]}});" for tid in table_ids)
         print(f"<script>$(document).ready(function(){{ {inits} }});</script>")
     except Exception as e:
-        print(f"<p style='color:red'><b>FTE data unavailable:</b> {html.escape(str(e))}</p>")
-        print("<p>The required tables (dept_courses_sched_hist_import, dept_courses_import, faculty_import2) may not be loaded into the database yet.</p>")
+        print(f"<p style='color:red'><b>FTE error:</b> {html.escape(str(e))}</p>")
 else:
     print("<h2>Faculty Directory</h2>")
     print("""
@@ -230,5 +236,4 @@ else:
     print(FacultyDirectory.list_to_html(faculty_members))
 
 print("</main></body></html>")
-
 conn.close()
