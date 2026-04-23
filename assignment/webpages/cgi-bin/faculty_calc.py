@@ -88,7 +88,7 @@ class FacultyDirectory:
 def get_fte(conn, prefix, gu, divisor):
     query = """
         SELECT
-            honorific || ' ' || first || ' ' || mi || ' ' || last AS instructor,
+            TRIM(COALESCE(honorific,'') || ' ' || COALESCE(first,'') || ' ' || COALESCE(mi,'') || ' ' || COALESCE(last,'')) AS instructor,
             year, semester,
             SUM((enrollment * ch) / %s) AS fte
         FROM dept_course_sched_hist_import h
@@ -96,7 +96,7 @@ def get_fte(conn, prefix, gu, divisor):
             ON h.prefix = c.prefix
            AND h.number::text = c.number::text
         JOIN faculty_import2 f
-            ON h.instructor = f.id
+            ON h.instructor::text = f.id::text
         WHERE c.ch > 0
           AND h.prefix = %s
           AND f.currently_employed = 'Yes'
@@ -116,7 +116,7 @@ def get_fte(conn, prefix, gu, divisor):
 def get_dasc_fte(conn):
     query = """
         SELECT
-            honorific || ' ' || first || ' ' || mi || ' ' || last AS instructor,
+            TRIM(COALESCE(honorific,'') || ' ' || COALESCE(first,'') || ' ' || COALESCE(mi,'') || ' ' || COALESCE(last,'')) AS instructor,
             year, semester,
             SUM((enrollment * ch) / 186.23) AS fte
         FROM dept_course_sched_hist_import h
@@ -124,7 +124,7 @@ def get_dasc_fte(conn):
             ON h.prefix = c.prefix
            AND h.number::text = c.number::text
         JOIN faculty_import2 f
-            ON h.instructor = f.id
+            ON h.instructor::text = f.id::text
         WHERE c.ch > 0
           AND h.prefix = 'DASC'
           AND f.currently_employed = 'Yes'
