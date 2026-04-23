@@ -1,3 +1,16 @@
+# 3010-proj-grp-5 - Phase4 PartB
+Please note:  This is a reminder that based on what you discussed with Oscar in class, 4/22/26, we did the auto postgresql start in part B and that we could get points back for Part A.
+8.Add the FTE: Lori and Justin created the FTE def (functions) within the existing faculty.py program from Phase 3.  Oscar modified the Table2_rev_phase3.htm from Phase 3 to work with the faculty.py program from phase 3.
+9. Docker container created using "Dockerfile" - create container, reference no other containers, install and auto start postgreSQL
+command to run container:  sudo docker exec -it <container_name> /bin/bash
+10. pg restore of DB: Add steps (Oscar)
+    make sure PSQL is connected
+    give permission to webuser1
+11. Check to make sure everything up to Phase 3 (Faculty Sort and Search) continues to work with the new FTE code.
+12. We created this branch in Part A, added the new faculty_calc.py to this folder.
+13. Export the DB structure and data using pg_dumpall (db config file, python object and html object)
+14. webpages - updated with new python and html files
+15. Push all files from your main project directory to the phase 4 branch of your Github project page and share the link
 # 3010-proj-grp-5 - Phase4 PartA
 Software Construction group project repository
 1. Oscar completed this step during the meeting with Lori and Justin.  Shut down, snapshot.
