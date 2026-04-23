@@ -1,16 +1,22 @@
 # 3010-proj-grp-5 - Phase4 PartB
 Please note:  This is a reminder that based on what you discussed with Oscar in class, 4/22/26, we did the auto postgresql start in part B and that we could get points back for Part A.
-8.Add the FTE: Lori and Justin created the FTE def (functions) within the existing faculty.py program from Phase 3.  Oscar modified the Table2_rev_phase3.htm from Phase 3 to work with the faculty.py program from phase 3.
-9. Docker container created using "Dockerfile" - create container, reference no other containers, install and auto start postgreSQL
-command to run container:  sudo docker exec -it <container_name> /bin/bash
-10. pg restore of DB: Add steps (Oscar)
-    make sure PSQL is connected
-    give permission to webuser1
+Please use link:  http://192.168.56.10/Table2_rev_phase3.htm.  You can click on FACULTY tab or FTE tab to see the contents.
+8.Add the FTE: Lori created the FTE functions to do the calculation for each category and modified our original faculty.py file. Justin helped create the FTE class within the existing faculty.py program from Phase 3.  Oscar modified the Table2_rev_phase3.htm from Phase 3 to work with the faculty.py program from phase 3.  We worked together to tweak both objects to show the required tab for FTE in the correct format per assignment. We went one step extra and provided each section as a screen with a search box you can use for faculty name, year, and semester.
+9. Docker container created using "Dockerfile" - created container and without reference to any other containers, installed and auto start postgreSQL
+command to run within our container:  to execute running container, we used sudo docker exec -it <container_name> /bin/bash
+10. pg restore of DB: (Oscar)
+    -make sure PSQL is connected
+    -give permission to webuser1
+    -create the database in the container using a directory we created called workspace
+    -import latest pg_dumpall file into that database
 11. Check to make sure everything up to Phase 3 (Faculty Sort and Search) continues to work with the new FTE code.
-12. We created this branch in Part A, added the new faculty_calc.py to this folder.
-13. Export the DB structure and data using pg_dumpall (db config file, python object and html object)
-14. webpages - updated with new python and html files
-15. Push all files from your main project directory to the phase 4 branch of your Github project page and share the link
+    We used link http://192.168.56.10/Table2_rev_phase3.htm.  We clicked on FACULTY tab (did search and sort) and FTE tab to see the contents.  Faculty        search and sort still works along with the new tabs.
+12. Lori created this branch in Part A, added the new faculty_calc.py and the new Table2_rev_phase3.htm to this folder. All team members updated these two     objects while we were working to get the FTE tab to work.
+13. Oscar exported the DB structure and data using pg_dumpall (db config file we changed, new python object and new html object).
+    Using the command 
+14. webpages - updated this folder with new faculty.py and Table2_rev_phase3.htm objects.
+15. All files pushed from our webvm project directory to the phase 4 branch of your Github project page and shared the link via email to instructor.
+
 # 3010-proj-grp-5 - Phase4 PartA
 Software Construction group project repository
 1. Oscar completed this step during the meeting with Lori and Justin.  Shut down, snapshot.
