@@ -3,7 +3,7 @@ Please note:  This is a reminder that based on what you discussed with Oscar in 
 Please use link:  http://192.168.56.10/Table2_rev_phase3.htm.  You can click on FACULTY tab or FTE tab to see the contents.
 8.Add the FTE: Lori created the FTE functions to do the calculation for each category and modified our original faculty.py file. Justin helped create the FTE class within the existing faculty.py program from Phase 3.  Oscar modified the Table2_rev_phase3.htm from Phase 3 to work with the faculty.py program from phase 3.  We worked together to tweak both objects to show the required tab for FTE in the correct format per assignment. We went one step extra and provided each section as a screen with a search box you can use for faculty name, year, and semester.
 9. Docker container created using "Dockerfile" - created container and without reference to any other containers, installed and auto start postgreSQL. 
-UPDATED:  to run the container initially, we used the Command  sudo docker run -it --entrypoint /bin/bash grp5-proj4:latest.  This ignores our ENTRYPOINT /bin/sleep 180 to start up postgresql.
+UPDATED:  to run the container initially, we used the Command  sudo docker run -it --entrypoint /bin/bash grp5-proj4:latest.  This ignores our ENTRYPOINT /bin/sleep 180 to start up postgresql.  
 Command to run within our container:  to execute running container, we used sudo docker exec -it <container_name> /bin/bash
 10. pg restore of DB: (Oscar)
     -make sure PSQL is connected
