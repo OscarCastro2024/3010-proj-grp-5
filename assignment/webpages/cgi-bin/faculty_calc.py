@@ -12,7 +12,6 @@ print('Content-Type: text/html\n')
 # -----------------------------
 # Faculty Class
 # -----------------------------
-#Class(object)
 class Faculty:
     def __init__(self,faculty_id,name,rank,email,phone,office,research_interest,remarks,lname,fname,mi):
         self.id = faculty_id
@@ -50,77 +49,59 @@ class FacultyDirectory:
         self.conn = conn
     
     def get_faculty(self, search=None, sort=None):
-        cursor= self.conn.cursor()
-
+        cursor = self.conn.cursor()
         query = """
-            SELECT faculty_id, name, rank, email, phone, office,research_interest, remarks,lname,fname,mi
+            SELECT faculty_id, name, rank, email, phone, office, research_interest, remarks, lname, fname, mi
             FROM   faculty
         """
         params = []
-#add search filter BEFORE executing
         if search:
-                   query += " WHERE lname ILIKE %s"
-                   params.append("%" + search + "%")
-#add sorting BEFORE executing
+            query += " WHERE lname ILIKE %s"
+            params.append("%" + search + "%")
         if sort in self.allowed_sorts:
-            query  += f" ORDER BY {self.allowed_sorts[sort]}"
+            query += f" ORDER BY {self.allowed_sorts[sort]}"
 
         cursor.execute(query, params)
-
         faculty_list = []
         row = cursor.fetchone()
-
         while row:
             faculty_list.append(Faculty(*row))
             row = cursor.fetchone()
-
         return faculty_list
 
     @staticmethod 
     def list_to_html(faculty_list):
-       rows = "".join(f.to_html_row() for f in faculty_list)
-       return f"""
-       <table border="1" cellpadding="5">
-       <tr>
-       <th>Name</th>
-       <th>Rank</th>
-       <th>Email</th>
-       <th>Phone</th>
-       <th>Office</th>
-       <th>Research Interests</th>
-       <th>Remarks</th>
-       </tr>
-       {rows}
-       </table>
-       """
+        rows = "".join(f.to_html_row() for f in faculty_list)
+        return f"""
+        <table border="1" cellpadding="5">
+        <tr>
+        <th>Name</th><th>Rank</th><th>Email</th><th>Phone</th>
+        <th>Office</th><th>Research Interests</th><th>Remarks</th>
+        </tr>
+        {rows}
+        </table>
+        """
+
 def get_fte(conn, prefix, gu, divisor):
     query = """
         SELECT 
             honorific || ' ' || first || ' ' || mi || ' ' || last AS instructor,
-            year,
-            semester,
+            year, semester,
             SUM((enrollment * ch) / %s) AS fte
         FROM dept_courses_sched_hist_import h
         JOIN dept_courses_import c
-            ON h.prefix = c.prefix
-           AND h.number = c.number
+            ON h.prefix = c.prefix AND h.number = c.number
         JOIN faculty_import2 f
             ON h.instructor = f.id
-        WHERE 
-            c.ch > 0
-            AND h.prefix = %s
-            AND f.currently_employed = 'Yes'
+        WHERE c.ch > 0
+          AND h.prefix = %s
+          AND f.currently_employed = 'Yes'
     """
     params = [divisor, prefix]
-
     if gu is not None:
         query += " AND c.gu = %s"
         params.append(gu)
-
-    query += """
-        GROUP BY honorific, first, mi, last, year, semester
-        ORDER BY instructor, year, semester;
-    """
+    query += " GROUP BY honorific, first, mi, last, year, semester ORDER BY instructor, year, semester;"
 
     with conn.cursor() as cur:
         cur.execute(query, params)
@@ -130,55 +111,38 @@ def get_dasc_fte(conn):
     query = """
         SELECT 
             honorific || ' ' || first || ' ' || mi || ' ' || last AS instructor,
-            year,
-            semester,
+            year, semester,
             SUM((enrollment * ch) / 186.23) AS fte
         FROM dept_courses_sched_hist_import h
         JOIN dept_courses_import c
-            ON h.prefix = c.prefix
-           AND h.number = c.number
+            ON h.prefix = c.prefix AND h.number = c.number
         JOIN faculty_import2 f
             ON h.instructor = f.id
-        WHERE 
-            c.ch > 0
-            AND h.prefix = 'DASC'
-            AND f.currently_employed = 'Yes'
-        GROUP BY 
-            honorific, first, mi, last, year, semester
-        ORDER BY 
-            instructor, year, semester;
+        WHERE c.ch > 0
+          AND h.prefix = 'DASC'
+          AND f.currently_employed = 'Yes'
+        GROUP BY honorific, first, mi, last, year, semester
+        ORDER BY instructor, year, semester;
     """
-
     with conn.cursor() as cur:
         cur.execute(query)
-        rows = cur.fetchall()
-        cols = [desc[0] for desc in cur.description]
-
-    return rows
+        return cur.fetchall()
 
 #--------------------------
-#cgi input
+# CGI input
 #--------------------------
-#Read form data-this is what comes back in the URL when the person enters a name and hits submit
 form = cgi.FieldStorage()
 lname = form.getvalue("lname")
 sort = form.getvalue("sort")
 tab = form.getvalue("tab") or "directory"
- 
 
 #--------------------------
-#connect to database
+# Connect to database
 #--------------------------
 conn = psycopg2.connect(
-  dbname="seng3010", user="webuser1",
-password="student", host="172.17.0.3",
-port=5432)
-
-CSCI_G = get_fte(conn, "CSCI", "G", 186.23)
-CSCI_U = get_fte(conn, "CSCI", "U", 406.24)
-SENG_G = get_fte(conn, "SENG", "G", 90.17)
-SENG_U = get_fte(conn, "SENG", "U", 232.25)
-DASC = get_dasc_fte(conn)
+    dbname="seng3010", user="webuser1",
+    password="student", host="172.17.0.3",
+    port=5432)
 
 directory = FacultyDirectory(conn)
 faculty_members = directory.get_faculty(search=lname, sort=sort)
@@ -210,30 +174,40 @@ print("""<!doctype html>
 
 if tab == "fte":
     print("<h2>FTE History</h2>")
-    datasets = [
-        ("CSCI Graduate", CSCI_G),
-        ("CSCI Undergraduate", CSCI_U),
-        ("SENG Graduate", SENG_G),
-        ("SENG Undergraduate", SENG_U),
-        ("DASC", DASC)
-    ]
-    table_ids = []
-    for title, data in datasets:
-        tid = "fte-" + title.replace(" ", "-").lower()
-        table_ids.append(tid)
-        print(f"<h3>{title}</h3>")
-        if not data:
-            print("<p>No data available.</p>")
-            continue
-        print(f'<table id="{tid}" class="display" style="width:100%">')
-        print("<thead><tr><th>Faculty</th><th>Year</th><th>Semester</th><th>FTE</th></tr></thead><tbody>")
-        for row in data:
-            instructor, year, semester, fte = row
-            fte_val = f"{float(fte):.2f}" if fte is not None else ""
-            print(f"<tr><td>{instructor}</td><td>{year}</td><td>{semester}</td><td>{fte_val}</td></tr>")
-        print("</tbody></table>")
-    inits = "\n".join(f"$('#{tid}').DataTable({{pageLength:5, lengthMenu:[5,10,25,50]}});" for tid in table_ids)
-    print(f"<script>$(document).ready(function(){{ {inits} }});</script>")
+    try:
+        CSCI_G = get_fte(conn, "CSCI", "G", 186.23)
+        CSCI_U = get_fte(conn, "CSCI", "U", 406.24)
+        SENG_G = get_fte(conn, "SENG", "G", 90.17)
+        SENG_U = get_fte(conn, "SENG", "U", 232.25)
+        DASC = get_dasc_fte(conn)
+
+        datasets = [
+            ("CSCI Graduate", CSCI_G),
+            ("CSCI Undergraduate", CSCI_U),
+            ("SENG Graduate", SENG_G),
+            ("SENG Undergraduate", SENG_U),
+            ("DASC", DASC)
+        ]
+        table_ids = []
+        for title, data in datasets:
+            tid = "fte-" + title.replace(" ", "-").lower()
+            table_ids.append(tid)
+            print(f"<h3>{title}</h3>")
+            if not data:
+                print("<p>No data available.</p>")
+                continue
+            print(f'<table id="{tid}" class="display" style="width:100%">')
+            print("<thead><tr><th>Faculty</th><th>Year</th><th>Semester</th><th>FTE</th></tr></thead><tbody>")
+            for row in data:
+                instructor, year, semester, fte = row
+                fte_val = f"{float(fte):.2f}" if fte is not None else ""
+                print(f"<tr><td>{instructor}</td><td>{year}</td><td>{semester}</td><td>{fte_val}</td></tr>")
+            print("</tbody></table>")
+        inits = "\n".join(f"$('#{tid}').DataTable({{pageLength:5, lengthMenu:[5,10,25,50]}});" for tid in table_ids)
+        print(f"<script>$(document).ready(function(){{ {inits} }});</script>")
+    except Exception as e:
+        print(f"<p style='color:red'><b>FTE data unavailable:</b> {html.escape(str(e))}</p>")
+        print("<p>The required tables (dept_courses_sched_hist_import, dept_courses_import, faculty_import2) may not be loaded into the database yet.</p>")
 else:
     print("<h2>Faculty Directory</h2>")
     print("""
