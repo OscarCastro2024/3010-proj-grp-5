@@ -164,6 +164,7 @@ form = cgi.FieldStorage()
 lname = form.getvalue("lname")
 sort = form.getvalue("sort")
 tab = form.getvalue("tab") or "directory"
+ 
 
 #--------------------------
 #connect to database
@@ -185,44 +186,75 @@ faculty_members = directory.get_faculty(search=lname, sort=sort)
 # -----------------------------
 # HTML Output
 # -----------------------------
-print("<html><body>")
-print("<h2>Faculty Directory</h2>")
-#print("<h2>Faculty Directory</h2>")
-
-print("""
-<form method="get">
-    Search by last name:
-    <input type="text" name="lname">
-    <br><br>
-    Sort by:
-    <select name="sort">
-        <option value="">None</option>
-        <option value="name">Name</option>
-        <option value="rank">Rank</option>
-    </select>
-    <br><br>
-<input type="submit" value="Search">
-</form>
-<hr>
+print("""<!doctype html>
+<html lang="en">
+<head>
+    <title>ECU CS Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+<header>
+    <h1>ECU CS Dashboard</h1>
+    <a href="/cgi-bin/faculty.py?tab=directory">Faculty</a>
+    <a href="">Courses</a>
+    <a href="">SCH Drilldown</a>
+    <a href="/cgi-bin/faculty.py?tab=fte">FTE</a>
+    <a href="">Faculty Committees</a>
+    <a href="">Resources</a>
+    <hr>
+</header>
+<main>
 """)
 
-print(FacultyDirectory.list_to_html(faculty_members))
-print("<h2>FTE Results</h2>")
+if tab == "fte":
+    print("<h2>FTE History</h2>")
+    datasets = [
+        ("CSCI Graduate", CSCI_G),
+        ("CSCI Undergraduate", CSCI_U),
+        ("SENG Graduate", SENG_G),
+        ("SENG Undergraduate", SENG_U),
+        ("DASC", DASC)
+    ]
+    table_ids = []
+    for title, data in datasets:
+        tid = "fte-" + title.replace(" ", "-").lower()
+        table_ids.append(tid)
+        print(f"<h3>{title}</h3>")
+        if not data:
+            print("<p>No data available.</p>")
+            continue
+        print(f'<table id="{tid}" class="display" style="width:100%">')
+        print("<thead><tr><th>Faculty</th><th>Year</th><th>Semester</th><th>FTE</th></tr></thead><tbody>")
+        for row in data:
+            instructor, year, semester, fte = row
+            fte_val = f"{float(fte):.2f}" if fte is not None else ""
+            print(f"<tr><td>{instructor}</td><td>{year}</td><td>{semester}</td><td>{fte_val}</td></tr>")
+        print("</tbody></table>")
+    inits = "\n".join(f"$('#{tid}').DataTable({{pageLength:5, lengthMenu:[5,10,25,50]}});" for tid in table_ids)
+    print(f"<script>$(document).ready(function(){{ {inits} }});</script>")
+else:
+    print("<h2>Faculty Directory</h2>")
+    print("""
+    <form method="get">
+        Search by last name:
+        <input type="text" name="lname">
+        <br><br>
+        Sort by:
+        <select name="sort">
+            <option value="">None</option>
+            <option value="name">Name</option>
+            <option value="rank">Rank</option>
+        </select>
+        <br><br>
+        <input type="hidden" name="tab" value="directory">
+        <input type="submit" value="Search">
+    </form>
+    <hr>
+    """)
+    print(FacultyDirectory.list_to_html(faculty_members))
 
-datasets = [
-    ("CSCI Graduate", CSCI_G),
-    ("CSCI Undergraduate", CSCI_U),
-    ("SENG Graduate", SENG_G),
-    ("SENG Undergraduate", SENG_U),
-    ("DASC", DASC)
-]
-
-for title, data in datasets:
-    print(f"<h3>{title}</h3>")
-    
-    for row in data:
-        print(f"<p>{row}</p>")
-
-#print("</body></html>")
 print("</main></body></html>")
+
 conn.close()
